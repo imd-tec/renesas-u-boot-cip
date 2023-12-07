@@ -91,6 +91,10 @@ config R9A09G047
 config R9A09G057
 	bool "Renesas SoC RZ/V2H"
 	imply CLK_R9A09G057
+
+config R9A09G056
+	bool "Renesas SoC RZ/V2N"
+
 endmenu
 
 choice
@@ -250,6 +254,12 @@ config TARGET_RZG3E_DEV
 	bool "RZ/G3E Dev board"
 	help
           Support for Renesas RZ/G3E Dev Platform
+config TARGET_RZV2N_DEV
+	bool "RZ/V2N Dev board"
+	help
+          Support for Renesas RZ/V2N Dev Platform
+
+endchoice
 
 config TARGET_SMARC_RZG3E
 	bool "RZ/G3E SMARC board"
@@ -287,6 +297,7 @@ source "board/renesas/rzv2h-dev/Kconfig"
 source "board/renesas/rzg3e-dev/Kconfig"
 source "board/imdt/imdt-rzv2h-evk/Kconfig"
 source "board/imdt/imdt-v2h-sbc/Kconfig"
+source "board/renesas/rzv2n-dev/Kconfig"
 
 config MULTI_DTB_FIT_UNCOMPRESS_SZ
 	default 0x80000 if TARGET_BEACON_RZG2M

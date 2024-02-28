@@ -1,0 +1,15 @@
+if TARGET_IMDT_RZV2H_EVK
+
+config SYS_SOC
+	default "rmobile"
+
+config SYS_BOARD
+	default "imdt-rzv2h-evk"
+
+config SYS_VENDOR
+	default "imdt"
+
+config SYS_CONFIG_NAME
+	default "imdt-rzv2h-evk"
+
+endif

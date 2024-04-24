@@ -973,6 +973,7 @@ dtb-$(CONFIG_RCAR_GEN3) += \
 	imdt-v2h-sbc.dtb \
 	rzg3e-dev.dtb \
 	smarc-rzg3e.dtb
+	rzv2n-evk.dtb
 
 dtb-$(CONFIG_RCAR_GEN4) += \
 	r8a779h0-gray-hawk.dtb

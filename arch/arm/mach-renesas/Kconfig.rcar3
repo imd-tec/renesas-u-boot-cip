@@ -259,6 +259,11 @@ config TARGET_RZV2N_DEV
 	help
           Support for Renesas RZ/V2N Dev Platform
 
+config TARGET_RZV2N_EVK
+	bool "RZ/V2N EVK board"
+	help
+          Support for Renesas RZ/V2N Dev Platform
+
 endchoice
 
 config TARGET_SMARC_RZG3E

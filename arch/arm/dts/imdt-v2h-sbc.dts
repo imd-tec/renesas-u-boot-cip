@@ -13,8 +13,8 @@
 #include "r9a09g057-u-boot.dtsi"
 
 / {
-	model = "IMDT RZ/V2H EVK";
-	compatible = "imdt,imdt-rzv2h-evk", "renesas,r9a09g057h4", "renesas,r9a09g057";
+	model = "IMDT V2H SBC";
+	compatible = "imdt,imdt-v2h-sbc", "renesas,r9a09g057h4", "renesas,r9a09g057";
 
 	aliases {
 		serial0 = &scif0;

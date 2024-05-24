@@ -4,12 +4,12 @@ config SYS_SOC
 	default "rmobile"
 
 config SYS_BOARD
-	default "imdt-rzv2h-evk"
+	default "imdt-v2h-sbc"
 
 config SYS_VENDOR
 	default "imdt"
 
 config SYS_CONFIG_NAME
-	default "imdt-rzv2h-evk"
+	default "imdt-v2h-sbc"
 
 endif

@@ -73,6 +73,8 @@
 
 		ethernet0 = &eth0;
 		ethernet1 = &eth1;
+		ethernet0 = &eth0;
+		ethernet1 = &eth1;
 	};
 
 	chosen {
@@ -894,6 +896,22 @@
 				data-lanes = <1 2>;
 				remote-endpoint = <&ov5645_to_csi23>;
 			};
+		};
+	};
+};
+
+&eth1 {
+	status = "okay";
+	phy-handle = <&phy1>;
+	phy-mode = "rgmii-id";
+
+	mdio {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		phy1: ethernet-phy@0 {
+			compatible = "ethernet-phy-ieee802.3-c22";
+			reg = <0>;
 		};
 	};
 };

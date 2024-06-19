@@ -58,6 +58,7 @@
 #define CONFIG_BOARD_SIZE_LIMIT		1048576
 
 /* ENV setting */
+#define CONFIG_SYS_MMC_IMG_LOAD_PART	2
 #if defined(CONFIG_TARGET_RZV2H_DEV)
 #define CONFIG_EXTRA_ENV_SETTINGS	\
 	"ocaaddr=0xC0000000 \0" \
@@ -76,16 +77,17 @@
 	"ocabin=OpenCV_Bin.bin \0" \
 	"usb_pgood_delay=2000\0"	\
 	"bootm_size=0x10000000\0"	\
-	"prodsdbootargs=setenv bootargs rw rootwait earlycon root=/dev/mmcblk1p2 \0" \
-	"prodemmcbootargs=setenv bootargs rw rootwait earlycon root=/dev/mmcblk0p2 \0" \
+	"mmcpart=" __stringify(CONFIG_SYS_MMC_IMG_LOAD_PART) "\0" \
+	"prodsdbootargs=setenv bootargs rw rootwait earlycon root=/dev/mmcblk1p${mmcpart} \0" \
+	"prodemmcbootargs=setenv bootargs rw rootwait earlycon root=/dev/mmcblk0p${mmcpart} \0" \
 	"bootimage=run set_pmic; booti 0x48080000 - 0x48000000 \0" \
 	"set_pmic=i2c dev 8; i2c mw 0x6a 0x22 0x0f; i2c mw 0x6a 0x24 0x00; i2c md 0x6a 0x00 0x30; i2c mw 0x12 0x8D 0x02; i2c md 0x12 0x20 0x80 \0" \
-	"emmcload=ext4load mmc 0:2 ${ocaaddr} boot/${ocabin}; ext4load mmc 0:2 0x48080000 boot/Image;ext4load mmc 0:2 0x48000000 boot/imdt-v2h-sbc.dtb;run prodemmcbootargs \0" \
-	"sd1load=ext4load mmc 1:2 ${ocaaddr} boot/${ocabin}; ext4load mmc 1:2 0x48080000 boot/Image;ext4load mmc 1:2 0x48000000 boot/imdt-v2h-sbc.dtb;run prodsdbootargs \0" \
+	"emmcload=ext4load mmc 0:${mmcpart} ${ocaaddr} boot/${ocabin}; ext4load mmc 0:${mmcpart} 0x48080000 boot/Image;ext4load mmc 0:${mmcpart} 0x48000000 boot/imdt-v2h-sbc.dtb;run prodemmcbootargs \0" \
+	"sd1load=ext4load mmc 1:${mmcpart} ${ocaaddr} boot/${ocabin}; ext4load mmc 1:${mmcpart} 0x48080000 boot/Image;ext4load mmc 1:${mmcpart} 0x48000000 boot/imdt-v2h-sbc.dtb;run prodsdbootargs \0" \
 	"bootcmd_check=if mmc dev 1; then run sd1load; else run emmcload; fi \0"
 #endif
 
-#define CONFIG_BOOTCOMMAND	"env default -a;run bootcmd_check;run bootimage"
+#define CONFIG_BOOTCOMMAND	"run bootcmd_check;run bootimage"
 
 /* For board */
 /* Ethernet RAVB */

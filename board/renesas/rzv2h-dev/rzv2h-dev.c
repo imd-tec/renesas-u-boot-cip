@@ -53,10 +53,14 @@ DECLARE_GLOBAL_DATA_PTR;
 
 /* CPG */
 #define CPG_BASE			0x10420000
-#define CPG_CLKON_ETH0			(CPG_BASE + 0x062C)
-#define CPG_CLKMON_ETH0			(CPG_BASE + 0x0814)
-#define CPG_RESET_ETH			(CPG_BASE + 0x092C)
-#define CPG_RESETMON_ETH		(CPG_BASE + 0x0A14)
+#define CPG_SSEL0			(CPG_BASE + 0x0300)
+#define CPG_SSEL1			(CPG_BASE + 0x0304)
+#define CPG_CLKON_11			(CPG_BASE + 0x062C)
+#define CPG_CLKON_12			(CPG_BASE + 0x0630)
+#define CPG_CLKMON_5			(CPG_BASE + 0x0814)
+#define CPG_CLKMON_6			(CPG_BASE + 0x0818)
+#define CPG_RST_11			(CPG_BASE + 0x092C)
+#define CPG_RSTMON_5			(CPG_BASE + 0x0A14)
 
 #define CPG_RST_USB			(CPG_BASE + 0x0928)
 #define CPG_RSTMON4_USB			(CPG_BASE + 0x0A10)
@@ -88,10 +92,14 @@ DECLARE_GLOBAL_DATA_PTR;
 #define USB2_PHY_RESET			0x000
 #define USB2_PHY_OTGR			0x600
 
+#define SYS_ADC_CFG			0x10431600
 
 void s_init(void)
 {
 	*(volatile u32 *)PWPR |= (PWPR_REGWE_A | PWPR_REGWE_B);
+
+	/* Enable ADC */
+	*(volatile u32 *)(SYS_ADC_CFG) = 0;
 
 #if CONFIG_TARGET_RZV2H_DEV
 	*(volatile u8 *)PMC_2A   &= ~(0x03<<4);	/* PA5,PA4 port	*/
@@ -133,6 +141,9 @@ void s_init(void)
 	*(volatile u32 *)CPG_CLKON_9 = 0x00080008;
 	*(volatile u32 *)CPG_RST_10  = 0x00010001;
 
+	/* Enale OE of IO block for xSPI */
+	*(volatile u32 *)(PFC_OEN) &= ~GENMASK(5,2);
+
 	// Use PLL clock for clk_tx_i only for RGMII mode
 	// Wite OEN reg. OEN0 bit "0" for output direction
 	*(volatile u32 *)(PFC_OEN) &= ~(PFC_OEN_OEN1 | PFC_OEN_OEN0);
@@ -144,21 +155,37 @@ void s_init(void)
 	/* Set Bypass and Powerdown mode for Audio OSC */
 	*(volatile u32 *)(PFC_OSCBYPS) = 0x001C0406;
 
-	/* Enable aclk_csr, aclk, tx, rx, tx_180, rx_180 for ETH0 */
-	*(volatile u32 *)(CPG_CLKON_ETH0) = 0x3F003F00;
-	while((*(volatile u32 *)(CPG_CLKMON_ETH0) & 0x3F000000) != 0x3F000000)
-		;
-
 	*(volatile u32 *)(ICU_IPTSR_REG) = 0;
 	
-	/* Reset ETH 0 */
-	*(volatile u32 *)(CPG_RESET_ETH) = 0x00010000;
-	while((*(volatile u32 *)(CPG_RESETMON_ETH) & 0x00000002) == 0x0)
+	/* Reset ETH 0,1 */
+	*(volatile u32 *)(CPG_RST_11) = 0x00030000;
+	while((*(volatile u32 *)(CPG_RSTMON_5) & 0x00000006) == 0x0)
 		;
 
-	*(volatile u32 *)(CPG_RESET_ETH) = 0x00010001;
-	while((*(volatile u32 *)(CPG_RESETMON_ETH) & 0x00000002) != 0x0)
+	/* Release reset ETH0,1 */
+	*(volatile u32 *)(CPG_RST_11) = 0x00030003;
+	while((*(volatile u32 *)(CPG_RSTMON_5) & 0x00000006) != 0x0)
 		;
+
+	/* Disable SMUX2_GBE0_RXCLK and SMUX2_GBE1_RXCLK */
+	*(volatile u32 *) (CPG_SSEL0) = 0x10000000;
+	*(volatile u32 *) (CPG_SSEL1) = 0x00100000;
+
+	/* Enable SMUX2_GBE0_RXCLK and SMUX2_GBE1_RXCLK */
+	*(volatile u32 *) (CPG_SSEL0) = 0x10001000;
+	*(volatile u32 *) (CPG_SSEL1) = 0x00100010;
+
+	/* Enable aclk_csr, aclk, tx, rx, tx_180, rx_180 for ETH0 */
+	/* Enable tx, rx for ETH1 */
+	*(volatile u32 *)(CPG_CLKON_11) = 0xFF00FF00;
+	while((*(volatile u32 *)(CPG_CLKMON_5) & 0xFF000000) != 0xFF000000)
+		;
+
+	/* Enable aclk_csr, aclk, tx_180, rx_180 for ETH1 */
+	*(volatile u32 *)(CPG_CLKON_12) = 0x000F000F;
+	while((*(volatile u32 *)(CPG_CLKMON_6) & 0x0000000F) != 0x0000000F)
+		;
+
 }
 
 static void _usbphy_init(void)
@@ -290,6 +317,36 @@ static void board_usb_init(void)
 	(*(volatile u32 *)(USB21_BASE + HcRhDescriptorA)) |= (0x1u << 12);
 }
 
+static void board_pmic_i2c_init(void)
+{
+	struct udevice *bus, *dev;
+	int ret;
+	u8 reg_addr, reg_val;
+
+	/* Get the I2C bus */
+	ret = uclass_get_device_by_seq(UCLASS_I2C, 8, &bus);
+	if (ret)
+		goto pmic_failed;
+
+	/* Initialize I2C device at address 0x6a */
+	ret = dm_i2c_probe(bus, 0x6a, 0, &dev);
+	if (ret)
+		goto pmic_failed;
+
+	/* Write 0x00 to register 0x24 of device 0x6a */
+	reg_addr = 0x24;
+	reg_val = 0x00;
+	ret = dm_i2c_write(dev, reg_addr, &reg_val, 1);
+	if (ret)
+		goto pmic_failed;
+
+	return;
+
+pmic_failed:
+	printf("Can not initialize PMIC settings via I2C8\n");
+	return;
+}
+
 int board_early_init_f(void)
 {
 
@@ -302,6 +359,11 @@ int board_init(void)
 	gd->bd->bi_boot_params = CONFIG_SYS_TEXT_BASE + 0x50000;
 
 	board_usb_init();
+
+	/* Initialize PMIC I2C devices */
+#if (CONFIG_TARGET_RZV2H_EVK_VER1)
+	board_pmic_i2c_init();
+#endif
 
 	return 0;
 }

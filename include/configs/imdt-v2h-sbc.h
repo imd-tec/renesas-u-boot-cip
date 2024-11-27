@@ -53,44 +53,48 @@
 #define CONFIG_SYS_MALLOC_LEN		(64 * 1024 * 1024)
 #define CONFIG_SYS_BOOTM_LEN		(64 << 20)
 
+#define SYS_LSI_MODE_ESD					(0)
+#define SYS_LSI_MODE_EMMC33					(1)
+#define SYS_LSI_MODE_SFLASH33				(2)
+#define SYS_LSI_MODE_SCIF					(3)
+#define SYS_LSI_MODE_ESD_2					(4)		/* Same as SYS_LSI_MODE_ESD */
+#define SYS_LSI_MODE_EMMC18					(5)
+#define SYS_LSI_MODE_SFLASH18				(6)
+#define SYS_LSI_MODE_SCIF_2					(7)		/* Same as SYS_LSI_MODE_SCIF */
+#define SYS_LSI_MODE_COUNT					(8)
+#define SYS_LSI_MODE_MASK					(0x7)
+
+
 /* The HF/QSPI layout permits up to 1 MiB large bootloader blob */
 #define CONFIG_BOARD_SIZE_LIMIT		1048576
 
 /* ENV setting */
-#define CONFIG_SYS_MMC_IMG_LOAD_PART	2
-
-#define MMC_PART 	"mmcpart=" __stringify(CONFIG_SYS_MMC_IMG_LOAD_PART) "\0" 
 #define EXTRA_ENV_SETTINGS_BASE	\
+	"mmcpart=2 \0"				\
 	"usb_pgood_delay=2000\0"	\
 	"bootm_size=0x10000000\0"	\
-	"prodsdbootargs=setenv bootargs rw rootwait earlycon root=/dev/mmcblk1p${mmcpart} \0" \
-	"prodemmcbootargs=setenv bootargs rw rootwait earlycon root=/dev/mmcblk0p${mmcpart} \0" \
+	"prodbootargs=setenv bootargs rw rootwait earlycon root=/dev/mmcblk${boot_device}p${mmcpart} \0" \
 	"bootimage=run set_pmic; booti 0x48080000 - 0x48000000 \0" \
 	"set_pmic=i2c dev 8; i2c mw 0x6a 0x22 0x0f; i2c mw 0x6a 0x24 0x00; i2c md 0x6a 0x00 0x30; i2c mw 0x12 0x8D 0x02; i2c md 0x12 0x20 0x80 \0" \
-	"bootcmd_check=if mmc dev 1; then run sd1load; else run emmcload; fi \0"
 
 #if defined(CONFIG_RZ_CODECS_IMDT_V2H) 
 #define CODECS_FEATURE \
 	"codaddr=0xC7D00000 \0"     \
 	"codbin=Codec_Bin.bin \0"
-#define EMMC_LOAD_COMMAND_CODEC "ext4load mmc 0:${mmcpart} ${codaddr} boot/${codbin}; "
-#define SD1_LOAD_COMMAND_CODEC "ext4load mmc 1:${mmcpart} ${codaddr} boot/${codbin}; "
+#define LOAD_COMMAND_CODEC "ext4load mmc ${boot_device}:${mmcpart} ${codaddr} boot/${codbin}; "
 #else
 	#define CODECS_FEATURE ""
-	#define EMMC_LOAD_COMMAND_CODEC ""
-	#define SD1_LOAD_COMMAND_CODEC ""
+	#define LOAD_COMMAND_CODEC ""
 #endif
 
 #if defined(CONFIG_RZ_OPENCVA_IMDT_V2H) 
 #define OCA_FEATURE \
  	"ocaaddr=0xC0000000 \0"     \
  	"ocabin=OpenCV_Bin.bin \0"  
- 	#define EMMC_LOAD_COMMAND_OPENCVA "ext4load mmc 0:${mmcpart} ${ocaaddr} boot/${ocabin}; "
- 	#define SD1_LOAD_COMMAND_OPENCVA "ext4load mmc 1:${mmcpart} ${ocaaddr} boot/${ocabin};"
+ 	#define LOAD_COMMAND_OPENCVA "ext4load mmc ${boot_device}:${mmcpart} ${ocaaddr} boot/${ocabin}; "
 #else
 	#define OCA_FEATURE "" 
-	#define EMMC_LOAD_COMMAND_OPENCVA ""
-	#define SD1_LOAD_COMMAND_OPENCVA ""
+	#define LOAD_COMMAND_OPENCVA ""
 #endif /* CONFIG_RZ_OPENCVA_IMDT_V2H */ 
 
 #if defined(CONFIG_RZ_DRPAI_IMDT_V2H)
@@ -104,26 +108,23 @@
 	#define DRPAI_FEATURE ""
 #endif /* CONFIG_RZ_DRPAI_IMDT_V2H */ \
 
-#define EMMC_LOAD_COMMANDS "emmcload=" \
-	EMMC_LOAD_COMMAND_CODEC \
-	EMMC_LOAD_COMMAND_OPENCVA \
-	"ext4load mmc 0:${mmcpart} 0x48080000 boot/Image;ext4load mmc 0:${mmcpart} 0x48000000 boot/imdt-v2h-sbc.dtb;run prodemmcbootargs \0" 
-#define SD1_LOAD_COMMAND \
-	"sd1load=" \
-	SD1_LOAD_COMMAND_CODEC \
-	SD1_LOAD_COMMAND_OPENCVA \
-	"ext4load mmc 1:${mmcpart} 0x48080000 boot/Image;ext4load mmc 1:${mmcpart} 0x48000000 boot/imdt-v2h-sbc.dtb;run prodsdbootargs \0" 
+#define BOOT_COMMAND \
+	"boot_command="	\
+	LOAD_COMMAND_CODEC \
+	LOAD_COMMAND_OPENCVA \
+	"ext4load mmc ${boot_device}:${mmcpart} 0x48080000 boot/Image; ext4load mmc ${boot_device}:${mmcpart} 0x48000000 boot/imdt-v2h-sbc.dtb; " \
+	""
+
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
-	MMC_PART \
 	DRPAI_FEATURE \
 	CODECS_FEATURE \
 	OCA_FEATURE \
  	EXTRA_ENV_SETTINGS_BASE \
-	EMMC_LOAD_COMMANDS \
-	SD1_LOAD_COMMAND 
+	BOOT_COMMAND \
 
-#define CONFIG_BOOTCOMMAND	"run bootcmd_check; run bootimage"
+
+#define CONFIG_BOOTCOMMAND	"setbootdevice; run boot_command; run prodbootargs; run bootimage"
 
 /* For board */
 /* Ethernet RAVB */

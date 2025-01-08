@@ -1,0 +1,23 @@
+if TARGET_IMDT_RZV2N_EVK
+
+config SYS_SOC
+	default "rmobile"
+
+config SYS_BOARD
+	default "imdt-v2n-sbc"
+
+config SYS_VENDOR
+	default "imdt"
+
+config SYS_CONFIG_NAME
+	default "imdt-v2n-sbc"
+
+config RZ_FEATURES_DRPAI
+    bool "Enable RZ DRPAI for IMDT V2x SBC"
+	default n
+    help
+      This applied patches included in the meta-rz-drpai layer,
+	  to the IMDT V2x SBC.
+	  
+endif
+

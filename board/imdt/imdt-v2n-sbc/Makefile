@@ -9,5 +9,5 @@
 ifdef CONFIG_SPL_BUILD
 obj-y	:= ../../renesas/rcar-common/gen3-spl.o
 else
-obj-y	:= imdt-v2h-sbc.o ../common/imdt-v2-sbc.o ../../renesas/rcar-common/common.o
+obj-y	:= imdt-v2n-sbc.o ../common/imdt-v2-sbc.o ../../renesas/rcar-common/common.o
 endif

@@ -254,6 +254,13 @@ config TARGET_RZG3E_DEV
 	bool "RZ/G3E Dev board"
 	help
           Support for Renesas RZ/G3E Dev Platform
+	  Support for Renesas RZ/V2H Version 1 Platform
+
+config TARGET_IMDT_RZV2H_EVK
+	bool "IMDT RZ/V2H SoM and carrier board"
+	help
+          Support for IMDT RZ/V2H SoM and Carrier Board
+		  
 config TARGET_RZV2N_DEV
 	bool "RZ/V2N Dev board"
 	help
@@ -263,6 +270,11 @@ config TARGET_RZV2N_EVK
 	bool "RZ/V2N EVK board"
 	help
           Support for Renesas RZ/V2N Dev Platform
+		  
+config TARGET_IMDT_RZV2N_EVK
+	bool "IMDT RZ/V2N SoM and carrier board"
+	help
+          Support for IMDT RZ/V2N SoM and Carrier Board
 
 endchoice
 
@@ -303,7 +315,7 @@ source "board/renesas/rzg3e-dev/Kconfig"
 source "board/imdt/imdt-rzv2h-evk/Kconfig"
 source "board/imdt/imdt-v2h-sbc/Kconfig"
 source "board/renesas/rzv2n-dev/Kconfig"
-
+source "board/imdt/imdt-v2n-sbc/Kconfig"
 config MULTI_DTB_FIT_UNCOMPRESS_SZ
 	default 0x80000 if TARGET_BEACON_RZG2M
 	default 0x80000 if TARGET_HIHOPE_RZG2

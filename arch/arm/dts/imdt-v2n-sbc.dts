@@ -7,14 +7,11 @@
  */
 
 /dts-v1/;
-#include <dt-bindings/gpio/gpio.h>
-#include "r9a09g057.dtsi"
-#include <dt-bindings/pinctrl/rzv2h-pinctrl.h>
-#include "r9a09g057-u-boot.dtsi"
-
+#include "r9a09g056.dtsi"
+#include <dt-bindings/pinctrl/rzv2n-pinctrl.h>
 / {
-	model = "IMDT V2H SBC";
-	compatible = "imdt,imdt-v2h-sbc", "renesas,r9a09g057h4", "renesas,r9a09g057";
+	 model = "IMDT V2N SBC";
+	 compatible = "imdt,imdt-v2n-sbc", "renesas,r9a09g056";
 
 	aliases {
 		serial0 = &scif0;
@@ -34,12 +31,7 @@
 	memory@48000000 {
 		device_type = "memory";
 		/* first 128MB is reserved for secure area. */
-		reg = <0x0 0x48000000 0x1 0xF8000000>;
-	};
-
-	memory@240000000 {
-		device_type = "memory";
-		reg = <0x2 0x40000000 0x2 0x00000000>;
+		 reg = <0x0 0x48000000 0x1 0xF8000000>;
 	};
 
 	reserved-memory {
@@ -76,13 +68,11 @@
 	};
 
 };
-
 &pinctrl {
-	sdhi1_pins: sd1 {
-		pinmux = <RZV2H_PINMUX(9, 4, 14)>; /* SD1_CD */
-	};
+    sdhi1_pins: sd1 {
+            pinmux = <RZV2N_PINMUX(9, 4, 14)>; /* SD1_CD */
+    };
 };
-
 &extal_clk {
 	clock-frequency = <24000000>;
 };
@@ -135,11 +125,46 @@
 	};
 };
 
-&ehci0 {
+&xspi {
 	status = "okay";
+
+	flash@0 {
+		compatible = "spi-flash", "jedec,spi-nor";
+		reg = <0>;
+		m25p,fast-read;
+		spi-max-frequency = <50000000>;
+		spi-tx-bus-width = <1>;
+		spi-rx-bus-width = <1>;
+
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			partition@000000 {
+				label = "bl2";
+				reg = <0x00000000 0x0001D200>;
+				read-only;
+			};
+			partition@01D200 {
+				label = "fip";
+				reg = <0x0001D200 0x001C2E00>;
+				read-only;
+			};
+			partition@1E0000 {
+				label = "env";
+				reg = <0x001E0000 0x00020000>;
+				read-only;
+			};
+			partition@200000 {
+				label = "test-area";
+				reg = <0x00200000 0x00E00000>;
+			};
+		};
+	};
 };
 
-&ehci1 {
+&ehci0 {
 	status = "okay";
 };
 

@@ -12,4 +12,28 @@ config SYS_VENDOR
 config SYS_CONFIG_NAME
 	default "imdt-v2h-sbc"
 
+config RZ_FEATURES_OPENCVA
+    bool "Enable RZ OpenCVA for IMDT V2x SBC"
+	default n
+    help
+      This enables the loading of the OpenCVA binary into memory, 
+	  to the IMDT V2x SBC, as seen in the patches included in 
+	  meta-rz-opencva layer from renesas.
+
+config RZ_FEATURES_CODECS
+    bool "Enable RZ Codecs for IMDT V2x SBC"
+	select RZ_FEATURES_OPENCVA
+	default n
+    help
+      This enables the loading of the Codecs binary into memory, 
+	  to the IMDT V2x SBC, as seen in the patches included in 
+	  meta-rz-codecs layer from renesas.
+
+config RZ_FEATURES_DRPAI
+    bool "Enable RZ DRPAI for IMDT V2x SBC"
+	default n
+    help
+      This applied patches included in the meta-rz-drpai layer,
+	  to the IMDT V2x SBC.
+
 endif

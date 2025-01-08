@@ -3,11 +3,10 @@
  * Copyright (C) 2022 Renesas Electronics Corporation
    Copyright (C) 2025 IMDT Ltd
 
-    Common header for the IMDT V2 based devices
+    Common header for the IMDT V2H and V2N Single board computers
  */
 #ifndef IMDT_COMMON
 #define IMDT_COMMON
-
 #include <asm/arch/rmobile.h>
 
 #define CONFIG_REMAKE_ELF
@@ -85,27 +84,13 @@
 	"config_device_tree=if test ${dsi_overlay} = 1; then setenv \"dsi_overlay_filename\" \"imdt-v2-sbc-dsi-hdmi.dtb\";fi; \0" \
 	"apply_overlay=run config_device_tree; ext4load mmc ${boot_device}:${mmcpart} ${dsi_overlay_addr} boot/${dsi_overlay_filename}; fdt resize 0x10000; fdt apply ${dsi_overlay_addr}; \0" \
 	
-#if defined(CONFIG_RZ_CODECS_IMDT_V2H) || defined (CONFIG_RZ_CODECS_IMDT_V2N) 
-#define CODECS_FEATURE \
-	"codaddr=0xC7D00000 \0"     \
-	"codbin=Codec_Bin.bin \0"
-#define LOAD_COMMAND_CODEC "ext4load mmc ${boot_device}:${mmcpart} ${codaddr} boot/${codbin}; "
-#else
-	#define CODECS_FEATURE ""
-	#define LOAD_COMMAND_CODEC ""
-#endif
+#define CODECS_FEATURE ""
+#define LOAD_COMMAND_CODEC ""
 
-#if defined(CONFIG_RZ_OPENCVA_IMDT_V2H)|| defined (CONFIG_RZ_OPENCVA_IMDT_V2N) 
-#define OCA_FEATURE \
- 	"ocaaddr=0xC0000000 \0"     \
- 	"ocabin=OpenCV_Bin.bin \0"  
- 	#define LOAD_COMMAND_OPENCVA "ext4load mmc ${boot_device}:${mmcpart} ${ocaaddr} boot/${ocabin}; "
-#else
-	#define OCA_FEATURE "" 
-	#define LOAD_COMMAND_OPENCVA ""
-#endif /* CONFIG_RZ_OPENCVA_IMDT_V2H */ 
+#define OCA_FEATURE "" 
+#define LOAD_COMMAND_OPENCVA ""
 
-#if defined(CONFIG_RZ_DRPAI_IMDT_V2H) || defined (CONFIG_RZ_DRPAI_IMDT_V2N)
+#if defined(CONFIG_RZ_FEATURES_DRPAI)
 #define DRPAI_FEATURE \
 	"ipaddr=192.168.1.11\0" \
 	"serverip=192.168.1.10\0" \
@@ -114,7 +99,7 @@
 	"eth1addr=02:11:22:33:44:66\0"
 #else 
 	#define DRPAI_FEATURE ""
-#endif /* CONFIG_RZ_DRPAI_IMDT_V2H */ \
+#endif /* CONFIG_RZ_FEATURES_DRPAI */
 
 #define BOOT_COMMAND \
 	"boot_command="	\
@@ -123,7 +108,8 @@
 	"ext4load mmc ${boot_device}:${mmcpart} 0x48080000 boot/Image; ext4load mmc ${boot_device}:${mmcpart} 0x48000000 boot/" \
 	CONFIG_DEFAULT_FDT_FILE \
 	"; fdt addr 0x48000000;" \
-	" run apply_overlay; \0" \
+	"run apply_overlay; \0" \
+	""
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	DRPAI_FEATURE \
@@ -138,4 +124,4 @@
 /* Ethernet RAVB */
 #define CONFIG_BITBANGMII_MULTI
 
-#endif
+#endif /* __IMDT_RZV2H_EVK_H */

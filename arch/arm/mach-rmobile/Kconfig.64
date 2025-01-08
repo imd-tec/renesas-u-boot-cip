@@ -247,6 +247,7 @@ config TARGET_IMDT_RZV2H_EVK
 	bool "IMDT RZ/V2H SoM and carrier board"
 	help
           Support for IMDT RZ/V2H SoM and Carrier Board
+		  
 config TARGET_RZV2N_DEV
 	bool "RZ/V2N Dev board"
 	help
@@ -256,6 +257,11 @@ config TARGET_RZV2N_EVK
 	bool "RZ/V2N EVK board"
 	help
           Support for Renesas RZ/V2N Dev Platform
+		  
+config TARGET_IMDT_RZV2N_EVK
+	bool "IMDT RZ/V2N SoM and carrier board"
+	help
+          Support for IMDT RZ/V2N SoM and Carrier Board
 
 endchoice
 
@@ -277,9 +283,9 @@ source "board/renesas/rzv2l-dev/Kconfig"
 source "board/renesas/rzg2lc-dev/Kconfig"
 source "board/renesas/rzg2ul-dev/Kconfig"
 source "board/renesas/rzv2h-dev/Kconfig"
-source "board/imdt/imdt-v2h-sbc/Kconfig"
 source "board/renesas/rzv2n-dev/Kconfig"
-
+source "board/imdt/imdt-v2h-sbc/Kconfig"
+source "board/imdt/imdt-v2n-sbc/Kconfig"
 config MULTI_DTB_FIT_UNCOMPRESS_SZ
 	default 0x80000 if TARGET_HIHOPE_RZG2
 	default 0x80000 if TARGET_SALVATOR_X

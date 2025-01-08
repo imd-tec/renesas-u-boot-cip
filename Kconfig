@@ -451,29 +451,6 @@ config EXAMPLES
 	  U-Boot provides an API for standalone applications. Examples are
 	  provided in directory examples/.
 
-config RZ_CODECS_IMDT_V2H
-    bool "Enable RZ Codecs for IMDT V2H SBC"
-	default n
-    help
-      This enables the loading of the Codecs binary into memory, 
-	  to the IMDT V2H SBC, as seen in the patches included in 
-	  meta-rz-codecs layer from renesas.
-
-config RZ_DRPAI_IMDT_V2H
-    bool "Enable RZ DRPAI for IMDT V2H SBC"
-	default n
-    help
-      This applied patches included in the meta-rz-drpai layer,
-	  to the IMDT V2H SBC.
-
-config RZ_OPENCVA_IMDT_V2H
-    bool "Enable RZ OpenCVA for IMDT V2H SBC"
-	default n
-    help
-      This enables the loading of the OpenCVA binary into memory, 
-	  to the IMDT V2H SBC, as seen in the patches included in 
-	  meta-rz-opencva layer from renesas.
-
 endmenu		# General setup
 
 source "api/Kconfig"

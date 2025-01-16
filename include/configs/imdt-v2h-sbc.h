@@ -76,7 +76,12 @@
 	"prodbootargs=setenv bootargs rw rootwait earlycon root=/dev/mmcblk${boot_device}p${mmcpart} \0" \
 	"bootimage=run set_pmic; booti 0x48080000 - 0x48000000 \0" \
 	"set_pmic=i2c dev 8; i2c mw 0x6a 0x22 0x0f; i2c mw 0x6a 0x24 0x00; i2c md 0x6a 0x00 0x30; i2c mw 0x12 0x8D 0x02; i2c md 0x12 0x20 0x80 \0" \
-
+	"dsi_overlay=0 \0" \
+	"dsi_overlay_addr=0x48040000 \0" \
+	"dsi_overlay_filename=imdt-v2-sbc-dsi-panel.dtb \0" \
+	"config_device_tree=if test ${dsi_overlay} = 1; then setenv \"dsi_overlay_filename\" \"imdt-v2-sbc-dsi-hdmi.dtb\";fi; \0" \
+	"apply_overlay=run config_device_tree; ext4load mmc ${boot_device}:${mmcpart} ${dsi_overlay_addr} boot/${dsi_overlay_filename}; fdt resize 0x10000; fdt apply ${dsi_overlay_addr}; \0" \
+	
 #if defined(CONFIG_RZ_CODECS_IMDT_V2H) 
 #define CODECS_FEATURE \
 	"codaddr=0xC7D00000 \0"     \
@@ -112,7 +117,8 @@
 	"boot_command="	\
 	LOAD_COMMAND_CODEC \
 	LOAD_COMMAND_OPENCVA \
-	"ext4load mmc ${boot_device}:${mmcpart} 0x48080000 boot/Image; ext4load mmc ${boot_device}:${mmcpart} 0x48000000 boot/imdt-v2h-sbc.dtb; " \
+	"ext4load mmc ${boot_device}:${mmcpart} 0x48080000 boot/Image; ext4load mmc ${boot_device}:${mmcpart} 0x48000000 boot/imdt-v2h-sbc.dtb; fdt addr 0x48000000;" \
+	"run apply_overlay; \0" \
 	""
 
 

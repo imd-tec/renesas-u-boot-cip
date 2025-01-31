@@ -122,9 +122,8 @@
 	LOAD_COMMAND_OPENCVA \
 	"ext4load mmc ${boot_device}:${mmcpart} 0x48080000 boot/Image; ext4load mmc ${boot_device}:${mmcpart} 0x48000000 boot/" \
 	CONFIG_DEFAULT_FDT_FILE \
-	"; run apply_overlay; \0" \
-	""
-
+	"; fdt addr 0x48000000;" \
+	" run apply_overlay; \0" \
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	DRPAI_FEATURE \
@@ -132,7 +131,6 @@
 	OCA_FEATURE \
  	EXTRA_ENV_SETTINGS_BASE \
 	BOOT_COMMAND \
-
 
 #define CONFIG_BOOTCOMMAND	"setbootdevice; run boot_command; run prodbootargs; run bootimage"
 

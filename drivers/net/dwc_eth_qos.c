@@ -240,8 +240,8 @@ struct eqos_tegra186_regs {
 
 #define EQOS_AUTO_CAL_STATUS_ACTIVE			BIT(31)
 
-#if IS_ENABLED(CONFIG_DWC_ETH_QOS_RZV2H)
-/* These registers are rzv2h-specific */
+#if IS_ENABLED(CONFIG_DWC_ETH_QOS_RZV2H) || IS_ENABLED(CONFIG_DWC_ETH_QOS_RZV2N)
+/* These registers are rzv2h/v2n specific */
 #define CPG_BASE					0x10420000
 #define CPG_CSDIV0					(CPG_BASE + 0x0500)
 #endif
@@ -897,7 +897,7 @@ static int eqos_set_tx_clk_speed_tegra186(struct udevice *dev)
 static int eqos_set_tx_clk_speed_rzv2h(struct udevice *dev)
 {
 	struct eqos_priv *eqos = dev_get_priv(dev);
-#if IS_ENABLED(CONFIG_DWC_ETH_QOS_RZV2H)
+#if IS_ENABLED(CONFIG_DWC_ETH_QOS_RZV2H) || IS_ENABLED(CONFIG_DWC_ETH_QOS_RZV2N)
 	debug("%s(dev=%p):\n", __func__, dev);
 
 	switch (eqos->phy->speed) {
@@ -2133,6 +2133,12 @@ static const struct udevice_id eqos_ids[] = {
 #if IS_ENABLED(CONFIG_DWC_ETH_QOS_RZV2H)
 	{
 		.compatible = "renesas,rzv2h-eqos",
+		.data = (ulong)&eqos_rzv2h_config
+	},
+#endif
+#if IS_ENABLED(CONFIG_DWC_ETH_QOS_RZV2N)
+	{
+		.compatible = "renesas,rzv2n-eqos",
 		.data = (ulong)&eqos_rzv2h_config
 	},
 #endif

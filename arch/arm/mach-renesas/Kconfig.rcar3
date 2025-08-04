@@ -90,7 +90,7 @@ config R9A09G047
 
 config R9A09G057
 	bool "Renesas SoC RZ/V2H"
-
+	imply CLK_R9A09G057
 endmenu
 
 choice

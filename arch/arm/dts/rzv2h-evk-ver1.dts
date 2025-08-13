@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
 /*
- * Device Tree Source for the RZ/V2H EVK Alpha board
+ * Device Tree Source for the RZ/V2H EVK Version 1 board
  *
  * Copyright (C) 2023 Renesas Electronics Corp.
  */
@@ -11,18 +11,8 @@
 #include <dt-bindings/pinctrl/rzv2h-pinctrl.h>
 #include "r9a09g057-u-boot.dtsi"
 
-/*
- * Jumper setting
- *
- * Please change the jumper setting corresponding to below Macros:
- *
- * SW2-4 SD0 Selector (SEL_SD0): 1: eMMC (default);	0: SD
- */
-
-#define SEL_SD0		1
-
 / {
-	model = "Renesas EVK Alpha based on r9a09g057h4";
+	model = "Renesas EVK Version 1 based on r9a09g057h4";
 	compatible = "renesas,r9a09g057h4-dev", "renesas,r9a09g057h4", "renesas,r9a09g057";
 
 	aliases {
@@ -89,12 +79,11 @@
 };
 
 &pinctrl {
-#if (!SEL_SD0)
 	/* Support pinctrl for SD function of SDHI0 */
 	sdhi0_pins: sd0 {
 		pinmux = <RZV2H_PINMUX(A, 5, 15)>; /* SD0_CD */
 	};
-#endif
+
 	sdhi1_pins: sd1 {
 		pinmux = <RZV2H_PINMUX(9, 4, 14)>; /* SD1_CD */
 	};
@@ -108,21 +97,10 @@
 	status = "okay";
 };
 
-#if (SEL_SD0)
 &sdhi0 {
-	bus-width = <8>;
-	non-removable;
-	fixed-emmc-driver-type = <1>;
-	status = "okay";
-};
-#else
-&sdhi0 {
-	pinctrl-0 = <&sdhi0_pins>;
-	pinctrl-names = "default";
 	bus-width = <4>;
 	status = "okay";
 };
-#endif
 
 &sdhi1 {
 	bus-width = <4>;
@@ -219,7 +197,7 @@
 			partition@1E0000 {
 				label = "env";
 				reg = <0x001E0000 0x00020000>;
-				read-only;
+				//read-only;
 			};
 			partition@200000 {
 				label = "test-area";

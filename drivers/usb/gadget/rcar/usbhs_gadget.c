@@ -152,5 +152,6 @@ int usb_gadget_handle_interrupts(int index)
 
 int dm_usb_gadget_handle_interrupts(struct udevice *dev)
 {
+	usb_gadget_handle_interrupts(0);
 	return 0;
 }

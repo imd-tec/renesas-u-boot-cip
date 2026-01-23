@@ -77,13 +77,17 @@
 	"bootm_size=0x10000000\0"	\
 	"prodbootargs=setenv bootargs rw rootwait earlycon root=/dev/mmcblk${boot_device}p${mmcpart} \0" \
 	"bootimage=run set_pmic; booti 0x48080000 - 0x48000000 \0" \
+	"overlay_list="__stringify(CONFIG_ADD_OVERLAYS)"\0" \
 	"set_pmic=i2c dev 8; i2c mw 0x6a 0x22 0x0f; i2c mw 0x6a 0x24 0x00; i2c md 0x6a 0x00 0x30; i2c mw 0x12 0x8D 0x02; i2c md 0x12 0x20 0x80 \0" \
-	"dsi_overlay=0 \0" \
-	"dsi_overlay_addr=0x48040000 \0" \
-	"dsi_overlay_filename=imdt-v2-sbc-dsi-panel.dtb \0" \
-	"config_device_tree=if test ${dsi_overlay} = 1; then setenv \"dsi_overlay_filename\" \"imdt-v2-sbc-dsi-hdmi.dtb\";fi; \0" \
-	"apply_overlay=run config_device_tree; ext4load mmc ${boot_device}:${mmcpart} ${dsi_overlay_addr} boot/${dsi_overlay_filename}; fdt resize 0x10000; fdt apply ${dsi_overlay_addr}; \0" \
-	
+	"overlay_addr=0x48070000 \0" \
+	"apply_overlays=" \
+    "fdt resize 0x60000; " \
+    "for overlay in ${overlay_list}; do " \
+        "echo Applying overlay ${overlay}; " \
+        "ext4load mmc ${boot_device}:${mmcpart} ${overlay_addr} boot/${overlay}; " \
+        "fdt apply ${overlay_addr}; " \
+    "done\0" \
+
 #define CODECS_FEATURE ""
 #define LOAD_COMMAND_CODEC ""
 
@@ -108,7 +112,7 @@
 	"ext4load mmc ${boot_device}:${mmcpart} 0x48080000 boot/Image; ext4load mmc ${boot_device}:${mmcpart} 0x48000000 boot/" \
 	CONFIG_DEFAULT_FDT_FILE \
 	"; fdt addr 0x48000000;" \
-	"run apply_overlay; \0" \
+	"run apply_overlays; \0" \
 	""
 
 #define CONFIG_EXTRA_ENV_SETTINGS \

@@ -12,6 +12,13 @@ config SYS_VENDOR
 config SYS_CONFIG_NAME
 	default "imdt-v2h-sbc"
 
+config ADD_OVERLAYS
+	string "Device tree overlays to apply at boot"
+	default ""
+	help
+	  Space-separated list of device tree overlay filenames to apply
+	  during boot. Example: "overlay1.dtb overlay2.dtb"
+
 config RZ_FEATURES_OPENCVA
     bool "Enable RZ OpenCVA for IMDT V2x SBC"
 	default n

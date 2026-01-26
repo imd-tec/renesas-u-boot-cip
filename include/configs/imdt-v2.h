@@ -77,7 +77,7 @@
 	"bootm_size=0x10000000\0"	\
 	"prodbootargs=setenv bootargs rw rootwait earlycon root=/dev/mmcblk${boot_device}p${mmcpart} \0" \
 	"bootimage=run set_pmic; booti 0x48080000 - 0x48000000 \0" \
-	"overlay_list="__stringify(CONFIG_ADD_OVERLAYS)"\0" \
+	"overlay_list="CONFIG_ADD_OVERLAYS"\0" \
 	"set_pmic=i2c dev 8; i2c mw 0x6a 0x22 0x0f; i2c mw 0x6a 0x24 0x00; i2c md 0x6a 0x00 0x30; i2c mw 0x12 0x8D 0x02; i2c md 0x12 0x20 0x80 \0" \
 	"overlay_addr=0x48070000 \0" \
 	"apply_overlays=" \

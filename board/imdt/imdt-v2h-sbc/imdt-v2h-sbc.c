@@ -1,7 +1,5 @@
 #include <common.h>
-#include <command.h>
 #include <cpu_func.h>
-#include <env.h>
 #include <image.h>
 #include <init.h>
 #include <malloc.h>
@@ -16,13 +14,13 @@
 #include <asm/arch/sys_proto.h>
 #include <asm/gpio.h>
 #include <asm/arch/gpio.h>
-#include <asm/arch/rmobile.h>
+#include <asm/arch/renesas.h>
 #include <asm/arch/rcar-mstp.h>
 #include <asm/arch/sh_sdhi.h>
 #include <i2c.h>
 #include <mmc.h>
 #include <linux/delay.h>
-#include <renesas/rzf-dev/mmio.h>
+#include <efi_loader.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -97,9 +95,25 @@ DECLARE_GLOBAL_DATA_PTR;
 
 #define SYS_ADC_CFG			0x10431600
 
+#if IS_ENABLED(CONFIG_EFI_HAVE_CAPSULE_SUPPORT)
 
+#define EFI_FIRMWARE_IMAGE_TYPE_RZV2H_GUID \
+	EFI_GUID(0x7f26b24e, 0x7cc4, 0x40a5, 0x8d, 0x3b, 0x0c, 0xbf, 0x47, 0x3f, 0x7a, 0x83)
 
-int set_boot_dev_env_var(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[]);
+struct efi_fw_image fw_images[] = {
+	{
+		.image_type_id = EFI_FIRMWARE_IMAGE_TYPE_RZV2H_GUID,
+		.fw_name = u"RENESAS-FIP",
+		.image_index = 1,
+	},
+};
+
+struct efi_capsule_update_info update_info = {
+	.dfu_string = "sf 0:0=fip.bin raw 0x20000 0x1F0000\0",
+	.num_images = ARRAY_SIZE(fw_images),
+	.images = fw_images,
+};
+#endif /* EFI_HAVE_CAPSULE_SUPPORT */
 
 void s_init(void)
 {
@@ -302,7 +316,7 @@ static void board_usb_init(void)
         (*(volatile u32 *)PFC_PFC26) &= ~(0xF << 28);
         /* Function mode 15 */
         (*(volatile u32 *)PFC_PFC26) |= (0x0E << 28);
-#endif /* CONFIG_TARGET_IMDT_RZV2H_EVK */
+#endif /* CONFIG_TARGET_RZV2H_EVK_ALPHA || CONFIG_TARGET_RZV2H_EVK_VER1 */
 
 	/* Enable Write protect */
 	(*(volatile u32 *)PFC_PWPR) &= ~(0x1u << 6);
@@ -328,7 +342,7 @@ static void board_pmic_i2c_init(void)
 {
 	struct udevice *bus, *dev;
 	int ret;
-	u8 reg_addr, reg_val;
+	u8 reg_addr, reg_val, read_val;
 
 	/* Get the I2C bus */
 	ret = uclass_get_device_by_seq(UCLASS_I2C, 8, &bus);
@@ -347,6 +361,20 @@ static void board_pmic_i2c_init(void)
 	if (ret)
 		goto pmic_failed;
 
+	/* Read the value of register 0x24 of device address 0x6a */
+	ret = dm_i2c_read(dev, reg_addr, &read_val, 1);
+	if (ret) {
+		printf("Failed to get value of register 0x%x\n", reg_addr);
+		goto pmic_failed;
+	}
+
+	/* Check if DCDC installation was successful */
+	if (read_val != reg_val) {
+		printf("Written value was not correctly at register 0x%x\n",
+		       reg_addr);
+		goto pmic_failed;
+	}
+
 	return;
 
 pmic_failed:
@@ -354,15 +382,42 @@ pmic_failed:
 	return;
 }
 
+
+int board_late_init(void)
+{
+	struct udevice *dev;
+	const u8 pmic_i2c_bus = 8;
+	u8 reg;
+	int ret;
+
+	ret = i2c_get_chip_for_busnum(pmic_i2c_bus, 0x12, 1, &dev);
+
+	if (!ret)
+	{
+		dm_i2c_read(dev, 0x3c, &reg, 1);
+		reg &= (~0x01);
+
+		dm_i2c_write(dev, 0x3c, &reg, 1);
+
+		udelay(2);
+		reg |= (0x01);
+
+		dm_i2c_write(dev, 0x3c, &reg, 1);
+	}
+
+	return ret;
+}
+
 int board_early_init_f(void)
 {
+
 	return 0;
 }
 
 int board_init(void)
 {
 	/* adress of boot parameters */
-	gd->bd->bi_boot_params = CONFIG_SYS_TEXT_BASE + 0x50000;
+	gd->bd->bi_boot_params = CONFIG_TEXT_BASE + 0x50000;
 
 	board_usb_init();
 

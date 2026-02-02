@@ -972,7 +972,7 @@ dtb-$(CONFIG_RCAR_GEN3) += \
 	rzv2h-evk-ver1.dtb \
 	imdt-v2h-sbc.dtb \
 	rzg3e-dev.dtb \
-	smarc-rzg3e.dtb
+	smarc-rzg3e.dtb \
 	rzv2n-evk.dtb
 
 dtb-$(CONFIG_RCAR_GEN4) += \

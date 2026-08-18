@@ -217,7 +217,7 @@ static void update_rpc_status(void *blob)
 	 * Check if the DT fragment received from TF-A had its RPC-IF device node
 	 * enabled.
 	 */
-	if (fdt_magic(atf_fdt_blob) != FDT_MAGIC)
+	if (!atf_fdt_blob || fdt_magic(atf_fdt_blob) != FDT_MAGIC)
 		return;
 
 	offset = fdt_path_offset(atf_fdt_blob, FDT_RPC_PATH);

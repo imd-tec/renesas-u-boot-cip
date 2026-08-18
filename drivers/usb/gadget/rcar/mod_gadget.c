@@ -599,6 +599,7 @@ static int usbhsg_ep_enable(struct usb_ep *ep,
 	if (uep->pipe) {
 		usbhs_pipe_clear(uep->pipe);
 		usbhs_pipe_sequence_data0(uep->pipe);
+		ep->desc = desc;
 		return 0;
 	}
 
@@ -624,6 +625,7 @@ static int usbhsg_ep_enable(struct usb_ep *ep,
 		else
 			pipe->handler = &usbhs_fifo_dma_pop_handler;
 
+		ep->desc = desc;
 		ret = 0;
 	}
 	pr_dbg("--%s\n", __func__);
@@ -645,6 +647,7 @@ static int usbhsg_ep_disable(struct usb_ep *ep)
 
 	uep->pipe->mod_private	= NULL;
 	uep->pipe		= NULL;
+	ep->desc		= NULL;
 	pr_dbg("--%s\n", __func__);
 
 	return 0;

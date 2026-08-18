@@ -438,10 +438,9 @@ static unsigned int rx_bytes_expected(struct usb_ep *ep)
 		return EP_BUFFER_SIZE;
 
 	/*
-	 * The host tearing down the transfer disables the endpoint, which
-	 * clears ep->desc. Requests already completed are still handed to the
-	 * completion handler afterwards, so refuse to queue more rather than
-	 * dereferencing a NULL descriptor.
+	 * An endpoint that has been torn down, or a UDC driver that never
+	 * recorded the descriptor, leaves nothing to read the max packet size
+	 * from. Refuse to queue rather than dereferencing a NULL descriptor.
 	 */
 	if (!ep->desc)
 		return 0;

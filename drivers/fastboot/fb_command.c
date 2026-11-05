@@ -11,6 +11,7 @@
 #include <fastboot-internal.h>
 #include <fb_mmc.h>
 #include <fb_nand.h>
+#include <fb_sf.h>
 #include <part.h>
 #include <stdlib.h>
 #include <linux/printk.h>
@@ -43,6 +44,7 @@ static void oem_partconf(char *, char *);
 static void oem_bootbus(char *, char *);
 static void oem_console(char *, char *);
 static void oem_board(char *, char *);
+static void oem_storage(char *, char *);
 static void run_ucmd(char *, char *);
 static void run_acmd(char *, char *);
 
@@ -113,6 +115,10 @@ static const struct {
 	[FASTBOOT_COMMAND_OEM_CONSOLE] = {
 		.command = "oem console",
 		.dispatch = CONFIG_IS_ENABLED(FASTBOOT_CMD_OEM_CONSOLE, (oem_console), (NULL))
+	},
+	[FASTBOOT_COMMAND_OEM_STORAGE] = {
+		.command = "oem storage",
+		.dispatch = CONFIG_IS_ENABLED(FASTBOOT_FLASH_SF, (oem_storage), (NULL))
 	},
 	[FASTBOOT_COMMAND_OEM_BOARD] = {
 		.command = "oem board",
@@ -336,6 +342,12 @@ void fastboot_data_complete(char *response)
  */
 static void __maybe_unused flash(char *cmd_parameter, char *response)
 {
+	if (IS_ENABLED(CONFIG_FASTBOOT_FLASH_SF) && fastboot_sf_selected()) {
+		fastboot_sf_flash_write(cmd_parameter, fastboot_buf_addr,
+					image_size, response);
+		return;
+	}
+
 	if (IS_ENABLED(CONFIG_FASTBOOT_FLASH_MMC))
 		fastboot_mmc_flash_write(cmd_parameter, fastboot_buf_addr,
 					 image_size, response);
@@ -356,6 +368,11 @@ static void __maybe_unused flash(char *cmd_parameter, char *response)
  */
 static void __maybe_unused erase(char *cmd_parameter, char *response)
 {
+	if (IS_ENABLED(CONFIG_FASTBOOT_FLASH_SF) && fastboot_sf_selected()) {
+		fastboot_sf_erase(cmd_parameter, response);
+		return;
+	}
+
 	if (IS_ENABLED(CONFIG_FASTBOOT_FLASH_MMC))
 		fastboot_mmc_erase(cmd_parameter, response);
 
@@ -568,6 +585,22 @@ void __weak fastboot_oem_board(char *cmd_parameter, void *data, u32 size, char *
  * @cmd_parameter: Pointer to command parameter
  * @response: Pointer to fastboot response buffer
  */
+/**
+ * oem_storage() - Choose the flash provider with "oem storage:nor|mmc"
+ *
+ * @cmd_parameter: "nor" for SPI NOR or "mmc" for the built-in provider
+ * @response: Pointer to fastboot response buffer
+ */
+static void __maybe_unused oem_storage(char *cmd_parameter, char *response)
+{
+	if (cmd_parameter && !strcmp(cmd_parameter, "nor"))
+		fastboot_sf_select(true, response);
+	else if (cmd_parameter && !strcmp(cmd_parameter, "mmc"))
+		fastboot_sf_select(false, response);
+	else
+		fastboot_fail("Expected nor or mmc", response);
+}
+
 static void __maybe_unused oem_board(char *cmd_parameter, char *response)
 {
 	fastboot_oem_board(cmd_parameter, (void *)fastboot_buf_addr, image_size, response);

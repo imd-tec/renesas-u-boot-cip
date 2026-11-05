@@ -238,6 +238,15 @@ config FASTBOOT_CMD_OEM_BOOTBUS
 	  Add support for the "oem bootbus" command from a client. This set
 	  the mmc boot configuration for the selecting eMMC device.
 
+config FASTBOOT_FLASH_SF
+	bool "Enable the 'oem storage' command for SPI NOR"
+	depends on FASTBOOT_FLASH_MMC && DM_SPI_FLASH
+	help
+	  Add an "oem storage" command. "oem storage:nor" makes "flash" and
+	  "erase" target the SPI NOR flash and "oem storage:mmc" returns to
+	  eMMC. A NOR partition is named by the environment variable
+	  fastboot_sf_partition_<name> holding "<offset> <size>" in bytes.
+
 config FASTBOOT_OEM_RUN
 	bool "Enable the 'oem run' command"
 	help

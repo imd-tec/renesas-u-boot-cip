@@ -30,6 +30,7 @@ The following OEM commands are supported (if enabled):
 - ``oem bootbus``  - this executes ``mmc bootbus %x %s`` to configure eMMC
 - ``oem run`` - this executes an arbitrary U-Boot command
 - ``oem console`` - this dumps U-Boot console record buffer
+- ``oem storage:<nor|mmc>`` - ``nor`` makes ``flash`` and ``erase`` target SPI NOR and ``mmc`` returns to eMMC
 - ``oem board`` - this executes a custom board function which is defined by the vendor
 
 Support for both eMMC and NAND devices is included.
@@ -229,6 +230,22 @@ and on the U-Boot side you should see::
    OK
 
    Starting kernel ...
+
+Flashing SPI NOR
+^^^^^^^^^^^^^^^^
+
+Enable ``CONFIG_FASTBOOT_FLASH_SF`` to add ``oem storage``. After
+``fastboot oem storage:nor``, ``fastboot flash <name>`` and ``fastboot erase
+<name>`` use the SPI NOR flash. A partition is the environment variable
+``fastboot_sf_partition_<name>`` holding ``<offset> <size>`` in bytes, both
+aligned to the flash erase size. For example::
+
+    => setenv fastboot_sf_partition_fip 0x60000 0x180000
+    $ fastboot oem storage:nor
+    $ fastboot flash fip fip.bin
+    $ fastboot oem storage:mmc
+
+The images are raw and not sparse.
 
 Running Shell Commands
 ^^^^^^^^^^^^^^^^^^^^^^

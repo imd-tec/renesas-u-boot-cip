@@ -1,0 +1,45 @@
+SCIF loader for the IMDT V2H SBC
+================================
+
+A replacement for Renesas Flash Writer. It brings the board up to a fastboot
+U-Boot from a serial cable alone, with nothing written to flash, and fastboot
+then writes BL2, the FIP or the eMMC.
+
+Build
+-----
+
+    tools/imdt/v2h-build-loader.sh v2h-fastboot.img
+
+This builds the SPL (imdt-v2h-sbc-spl_defconfig) and the fastboot-only U-Boot
+(imdt-v2h-sbc-fastboot_defconfig) and bundles them with the DDR PHY firmware.
+
+Boot flow
+---------
+
+1. Boot mode "prog" (SCIF download). The boot ROM takes the SPL as an srec
+   over SCIF at 115200 baud into SRAM. The ROM refuses an image over 224 KiB.
+2. The SPL releases SCIF0 from reset and module stop, runs the TF-A CPG, PFC
+   and TZC setup (copied under tfa/) and switches SCIF to 921600 baud.
+3. The host sends the DDR PHY firmware into SRAM. The SPL trains DRAM.
+4. The host sends the second stage into DRAM at 0x50000000 and the SPL jumps
+   to it. That is the fastboot-only U-Boot, running at EL3 without BL31, so it
+   is for flashing and not for booting Linux.
+
+Each transfer is "FBLD", u32 address, u32 length, payload, u32 byte sum.
+Booting to fastboot takes about 19 seconds.
+
+ROM image
+---------
+
+The ROM wants a 512 byte header at 0x08101E00 (size, 0x200, load address
+0x08108000, 0x55 0xaa at the end) and the body at 0x08108000. It rejects S5
+records. tools/imdt/v2h-spl-srec.sh adds the header.
+
+Flashing
+--------
+
+    fastboot stage fip.bin
+    fastboot oem run:"sf probe; sf erase 0x60000 0x120000; sf write 0x62000000 0x60000 0x120000"
+
+BL2 lives at 0x0 and the FIP at 0x60000. eMMC images go through "fastboot
+flash". Console output of "oem run" appears on the serial console only.

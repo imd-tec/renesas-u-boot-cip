@@ -35,7 +35,7 @@ void syc_init(unsigned int freq)
 
 void tfa_udelay(unsigned long usec)
 {
-	uint64_t end = cntpct() + (uint64_t)usec * (RZV2H_SYC_INCK_HZ / 1000000);
+	uint64_t end = cntpct() + (uint64_t)usec * (24000000UL / 1000000);
 
 	while (cntpct() < end)
 		;

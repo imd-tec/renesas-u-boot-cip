@@ -45,7 +45,7 @@ ENTRY(lowlevel_init)
 	 * For single-entry systems the lowlevel init is very simple.
 	 * The V2H SPL runs before the GIC clock is enabled.
 	 */
-#if !(defined(CONFIG_SPL_BUILD) && defined(CONFIG_R9A09G057))
+#if !(defined(CONFIG_SPL_BUILD) && (defined(CONFIG_R9A09G057) || defined(CONFIG_R9A09G056)))
 	ldr	x0, =GICD_BASE
 	bl	gic_init_secure
 #endif

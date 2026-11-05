@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
- * RZ/V2H SCIF-loadable loader SPL.
+ * RZ/V2H and RZ/V2N SCIF-loadable loader SPL.
  *
  * The boot ROM runs this from SRAM. It brings up clocks, security and DRAM,
  * taking the DDR PHY firmware over SCIF first, then loads a second stage into
@@ -12,6 +12,12 @@
 #include <asm/io.h>
 #include <cpg.h>
 #include <ddr.h>
+
+#ifdef CONFIG_R9A09G056
+#define SOC_NAME		"V2N"
+#else
+#define SOC_NAME		"V2H"
+#endif
 
 #define CPG_BASE		0x10420000UL
 #define CPG_CLKON_8		(CPG_BASE + 0x620)
@@ -183,7 +189,7 @@ void board_init_f(ulong dummy)
 	cpg_setup();
 	scif0_init(BRR_115200);
 
-	scif0_puts("\nV2H SPL\nbaud\n");
+	scif0_puts("\n" SOC_NAME " SPL\nbaud\n");
 	scif0_flush();
 	scif0_init(BRR_921600);
 

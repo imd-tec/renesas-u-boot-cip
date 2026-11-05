@@ -1,5 +1,5 @@
-SCIF loader for the IMDT V2H SBC
-================================
+SCIF loader for the IMDT V2H and V2N SBCs
+=========================================
 
 A replacement for Renesas Flash Writer. It brings the board up to a fastboot
 U-Boot from a serial cable alone, with nothing written to flash, and fastboot
@@ -9,9 +9,13 @@ Build
 -----
 
     tools/imdt/v2h-build-loader.sh v2h-fastboot.img
+    tools/imdt/v2n-build-loader.sh v2n-fastboot.img
 
 This builds the SPL (imdt-v2h-sbc-spl_defconfig) and the fastboot-only U-Boot
 (imdt-v2h-sbc-fastboot_defconfig) and bundles them with the DDR PHY firmware.
+The V2N uses the imdt-v2n-sbc-* defconfigs. Its code is under
+board/imdt/imdt-v2n-sbc/tfa and it shares spl.c and glue.c with the V2H. The
+PHY firmware is identical, so both boards use the same blob.
 
 Boot flow
 ---------

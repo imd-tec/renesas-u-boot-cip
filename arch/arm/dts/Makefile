@@ -971,6 +971,7 @@ dtb-$(CONFIG_RCAR_GEN3) += \
 	rzv2n-dev.dtb \
 	rzv2h-evk-ver1.dtb \
 	imdt-v2h-sbc.dtb \
+	imdt-v2h-sbc-fastboot.dtb \
 	rzg3e-dev.dtb \
 	smarc-rzg3e.dtb \
 	rzv2n-evk.dtb

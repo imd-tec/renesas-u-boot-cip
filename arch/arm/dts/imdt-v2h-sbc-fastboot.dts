@@ -1,0 +1,19 @@
+// SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+/*
+ * IMDT V2H SBC fastboot image: the board DT plus the xSPI flash.
+ */
+
+#include "imdt-v2h-sbc.dts"
+
+&xspi {
+	status = "okay";
+
+	flash@0 {
+		compatible = "spi-flash", "jedec,spi-nor";
+		reg = <0>;
+		m25p,fast-read;
+		spi-max-frequency = <50000000>;
+		spi-tx-bus-width = <1>;
+		spi-rx-bus-width = <1>;
+	};
+};
